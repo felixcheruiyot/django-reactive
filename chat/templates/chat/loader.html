@@ -16,16 +16,21 @@
             this.loaders = document.querySelectorAll("loader")
             if (this.loaders) {
                 this.loaders.forEach(element => {
-                    let src = element.getAttribute("src")
-                    this.getData(src).then(function (output) {
-                        console.log("output", output)
-                        if (output) {
-                            element.innerHTML = output
-                            self.globalEventsListers()
-                        }
-                    })
+                    self.updateUI(element)
                 })
             }
+        }
+
+        updateUI(element) {
+            self = this
+            let src = element.getAttribute("src")
+            this.getData(src).then(function (output) {
+                console.log("output", output)
+                if (output) {
+                    element.innerHTML = output
+                    self.globalEventsListers()
+                }
+            })
         }
 
         getData(src) {
@@ -51,16 +56,29 @@
         }
 
         globalEventsListers() {
+            let self = this
             let buttons = document.querySelectorAll("button")
             buttons.forEach((button) => {
                 button.addEventListener('click', (ev) => {
                     ev.preventDefault()
                     let target = button.dataset.target
+                    let targettype = button.dataset.targettype
                     let onupdate = button.dataset.onupdate
                     // 1. Get the form 1
                     // 2. Get all the data and submit i.e using json
                     // 3. Obtain response and reload onupdate loader
-                    alert(target + onupdate)
+
+                    let targetObj = document.getElementById(target)
+                    if (targettype !== "undefined") {
+                        if (targettype === "form") {
+                            const data = new FormData(targetObj)
+                            const form = Array.from(data.entries())
+                            alert(JSON.stringify(form))
+
+                            let itemsToLoad = document.getElementById(onupdate)
+                            self.updateUI(itemsToLoad)
+                        }
+                    }
                 });
             })
         }

@@ -7,10 +7,10 @@
     </div>
 
     <div>
-        <form action="details" id="new-item" method="POST">
-            <input type="text" placeholder="content">
+        <form action="details" id="new-item-form" method="POST">
+            <input type="text" name="item" placeholder="new item">
             <p>
-                <button data-target="new-item" data-onupdate="items">Submit</button>
+                <button data-target="new-item-form" data-targettype="form" data-onupdate="items">Submit</button>
             </p>
         </form>
     </div>
