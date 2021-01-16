@@ -1,0 +1,17 @@
+<a href="/">Home</a>
+<div>
+    <div>
+        {% for item in items %}
+        <p>{{item.name}}</p>
+        {% endfor %}
+    </div>
+
+    <div>
+        <form action="details" id="new-item" method="POST">
+            <input type="text" placeholder="content">
+            <p>
+                <button data-target="new-item" data-onupdate="items">Submit</button>
+            </p>
+        </form>
+    </div>
+</div>

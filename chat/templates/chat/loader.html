@@ -1,0 +1,72 @@
+<html>
+
+<head>
+
+</head>
+
+<body>
+    <h1>Load and compute items</h1>
+    <loader id="items" src="/"></loader>
+</body>
+<script src="https://mozilla.github.io/nunjucks/files/nunjucks.js"></script>
+<script>
+    class Loader {
+        constructor() {
+            let self = this
+            this.loaders = document.querySelectorAll("loader")
+            if (this.loaders) {
+                this.loaders.forEach(element => {
+                    let src = element.getAttribute("src")
+                    this.getData(src).then(function (output) {
+                        console.log("output", output)
+                        if (output) {
+                            element.innerHTML = output
+                            self.globalEventsListers()
+                        }
+                    })
+                })
+            }
+        }
+
+        getData(src) {
+            let self = this
+            return fetch(src).then(function (response) {
+                return response.text().then(function (data) {
+                    console.log("data", data)
+                    return self.parseTemplate(src, JSON.parse(data))
+                })
+            })
+        }
+
+        parseTemplate(src, data) {
+            return fetch(src + "?format=template").then(function (response) {
+                return response.text().then(function (template) {
+                    nunjucks.configure({
+                        autoescape: true
+                    });
+                    let result = nunjucks.renderString(template, data);
+                    return result
+                });
+            });
+        }
+
+        globalEventsListers() {
+            let buttons = document.querySelectorAll("button")
+            buttons.forEach((button) => {
+                button.addEventListener('click', (ev) => {
+                    ev.preventDefault()
+                    let target = button.dataset.target
+                    let onupdate = button.dataset.onupdate
+                    // 1. Get the form 1
+                    // 2. Get all the data and submit i.e using json
+                    // 3. Obtain response and reload onupdate loader
+                    alert(target + onupdate)
+                });
+            })
+        }
+    }
+
+    let loader = new Loader()
+</script>
+
+</html>
