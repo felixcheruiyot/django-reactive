@@ -16,11 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from chat.views import index, loader, other
+from chat.views import index, loader, todos
 
 urlpatterns = [
     path('', index),
     path('loader/', loader),
-    path('other/', other),
+    path('todos/', todos),
     path('admin/', admin.site.urls),
 ]

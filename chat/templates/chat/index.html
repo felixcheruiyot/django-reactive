@@ -1,16 +1,14 @@
 <a href="/">Home</a>
 <div>
     <div>
-        {% for item in items %}
-        <p>{{item.name}}</p>
-        {% endfor %}
+        {{title}}
     </div>
 
     <div>
         <form action="details" id="new-item-form" method="POST">
-            <input type="text" name="item" placeholder="new item">
+            <input type="text" name="label" placeholder="new item">
             <p>
-                <button data-target="new-item-form" data-targettype="form" data-onupdate="items">Submit</button>
+                <button data-target="new-item-form" data-targettype="form" data-onupdate="todos">Submit</button>
             </p>
         </form>
     </div>

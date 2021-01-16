@@ -6,43 +6,73 @@
 
 <body>
     <h1>Load and compute items</h1>
-    <loader id="items" src="/"></loader>
+    <div style="background-color: gold;">
+        <loader id="items" src="/"></loader>
+    </div>
+    <div style="background-color: red;">
+        <loader id="todos" src="/todos"></loader>
+    </div>
 </body>
 <script src="https://mozilla.github.io/nunjucks/files/nunjucks.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.5/redux.min.js"></script>
 <script>
     class Loader {
         constructor() {
             let self = this
             this.loaders = document.querySelectorAll("loader")
             if (this.loaders) {
+                self.createStore()
                 this.loaders.forEach(element => {
-                    self.updateUI(element)
+                    let src = element.getAttribute("src")
+                    let id = element.getAttribute("id")
+                    this.getData(id, src).then(function (output) {
+                        if (output) {
+                            self.updateUI(id, element)
+                        }
+                    })
                 })
             }
         }
 
-        updateUI(element) {
+        updateUI(id, element) {
             self = this
             let src = element.getAttribute("src")
-            this.getData(src).then(function (output) {
-                console.log("output", output)
-                if (output) {
-                    element.innerHTML = output
-                    self.globalEventsListers()
-                }
+            let data = self.store.getState()
+            console.log("Data", self.store.getState())
+            let output = self.parseTemplate(src, data).then((output) => {
+                element.innerHTML = output
+                self.globalEventsListers()
             })
         }
 
-        getData(src) {
+        getData(id, src) {
             let self = this
             return fetch(src).then(function (response) {
                 return response.text().then(function (data) {
-                    console.log("data", data)
-                    return self.parseTemplate(src, JSON.parse(data))
+                    let payload = {}
+                    return self.store.dispatch({
+                        type: 'ADD_DATA',
+                        data: JSON.parse(data)
+                    })
                 })
             })
         }
 
+        createStore() {
+            function dataManager(state = [], action) {
+                switch (action.type) {
+                    case 'ADD_DATA':
+                        console.log("Add data")
+                        state = action.data
+                        return state
+                    case 'REMOVE_DATA':
+                        return state
+                    default:
+                        return state
+                }
+            }
+            this.store = Redux.createStore(dataManager)
+        }
         parseTemplate(src, data) {
             return fetch(src + "?format=template").then(function (response) {
                 return response.text().then(function (template) {
@@ -60,23 +90,37 @@
             let buttons = document.querySelectorAll("button")
             buttons.forEach((button) => {
                 button.addEventListener('click', (ev) => {
+                    console.log("State", self.store.getState())
                     ev.preventDefault()
                     let target = button.dataset.target
                     let targettype = button.dataset.targettype
                     let onupdate = button.dataset.onupdate
-                    // 1. Get the form 1
-                    // 2. Get all the data and submit i.e using json
-                    // 3. Obtain response and reload onupdate loader
+                    // 1. Get the form and submit it using ajax
+                    // 2. Obtain response, update data if onupdate is defined
 
                     let targetObj = document.getElementById(target)
                     if (targettype !== "undefined") {
                         if (targettype === "form") {
                             const data = new FormData(targetObj)
                             const form = Array.from(data.entries())
-                            alert(JSON.stringify(form))
+                            let form_data = form.map((item) => {
+                                let item_dict = {}
+                                item_dict[item[0]] = item[1]
+                                return item_dict
+                            })
+                            console.log(JSON.stringify(form_data))
 
+                            // let current_data = self.store.getState()[onupdate]
+                            // console.log("current_data", current_data)
+                            // current_data[onupdate].unshift({name: "cxxxx"})
+                            let new_data = {}
+                            new_data[onupdate] = form_data
+                            self.store.dispatch({
+                                type: 'ADD_DATA',
+                                data: new_data
+                            })
                             let itemsToLoad = document.getElementById(onupdate)
-                            self.updateUI(itemsToLoad)
+                            self.updateUI(onupdate, itemsToLoad)
                         }
                     }
                 });
