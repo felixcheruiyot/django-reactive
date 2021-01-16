@@ -1,0 +1,9 @@
+<h1>Todos</h1>
+
+{% if todos %}
+<div>
+    {% for item in todos %}
+    <p style="border: 1px solid #434343; padding: 10px;">{{item.label}}</p>
+    {% endfor %}
+</div>
+{%  endif %}
