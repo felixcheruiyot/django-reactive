@@ -12,9 +12,15 @@
     <div style="background-color: red;">
         <loader id="todos" src="/todos"></loader>
     </div>
+
+    <div style="background-color: blue;">
+        <loader id="services" src="/todos"></loader>
+    </div>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://mozilla.github.io/nunjucks/files/nunjucks.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.5/redux.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
 <script>
     class Loader {
         constructor() {
@@ -41,19 +47,18 @@
             console.log("Data", self.store.getState())
             let output = self.parseTemplate(src, data).then((output) => {
                 element.innerHTML = output
-                self.globalEventsListers()
+                self.setElementEventsListers(element)
             })
         }
 
         getData(id, src) {
             let self = this
-            return fetch(src).then(function (response) {
-                return response.text().then(function (data) {
-                    let payload = {}
-                    return self.store.dispatch({
-                        type: 'ADD_DATA',
-                        data: JSON.parse(data)
-                    })
+            return axios.get(src).then(function (response) {
+                let data = response.data
+                let payload = {}
+                return self.store.dispatch({
+                    type: 'ADD_DATA',
+                    data: data
                 })
             })
         }
@@ -71,27 +76,36 @@
                         return state
                 }
             }
+
+            function handleDataChange() {
+                function select(state) {
+                    return state.some.deep.property
+                }
+            }
+
             this.store = Redux.createStore(dataManager)
+            this.store.subscribe(handleDataChange)
         }
+
         parseTemplate(src, data) {
-            return fetch(src + "?format=template").then(function (response) {
-                return response.text().then(function (template) {
-                    nunjucks.configure({
-                        autoescape: true
-                    });
-                    let result = nunjucks.renderString(template, data);
-                    return result
+            return axios.get(src + "?format=template").then(function (response) {
+                let template = response.data
+                nunjucks.configure({
+                    autoescape: true
                 });
+                let result = nunjucks.renderString(template, data);
+                return result
             });
         }
 
-        globalEventsListers() {
+        setElementEventsListers(parent) {
             let self = this
-            let buttons = document.querySelectorAll("button")
+            let buttons = parent.querySelectorAll("button")
             buttons.forEach((button) => {
                 button.addEventListener('click', (ev) => {
                     console.log("State", self.store.getState())
                     ev.preventDefault()
+                    ev.stopPropagation()
                     let target = button.dataset.target
                     let targettype = button.dataset.targettype
                     let onupdate = button.dataset.onupdate
@@ -99,6 +113,7 @@
                     // 2. Obtain response, update data if onupdate is defined
 
                     let targetObj = document.getElementById(target)
+                    let elementToLoad = document.getElementById(onupdate)
                     if (targettype !== "undefined") {
                         if (targettype === "form") {
                             const data = new FormData(targetObj)
@@ -110,17 +125,32 @@
                             })
                             console.log(JSON.stringify(form_data))
 
+                            const csrftoken = Cookies.get('csrftoken');
+                            let headers = {
+                                'X-CSRFToken': csrftoken
+                            }
+
+                            axios.post("/", form_data[0], {
+                                headers: headers
+                            }).then((resp) => {
+                                let src = elementToLoad.getAttribute("src")
+                                this.getData(onupdate, src).then(function (output) {
+                                    if (output) {
+                                        self.updateUI(onupdate, elementToLoad)
+                                    }
+                                })
+                            })
+
                             // let current_data = self.store.getState()[onupdate]
                             // console.log("current_data", current_data)
                             // current_data[onupdate].unshift({name: "cxxxx"})
-                            let new_data = {}
-                            new_data[onupdate] = form_data
-                            self.store.dispatch({
-                                type: 'ADD_DATA',
-                                data: new_data
-                            })
-                            let itemsToLoad = document.getElementById(onupdate)
-                            self.updateUI(onupdate, itemsToLoad)
+                            // let new_data = {}
+                            // new_data[onupdate] = form_data
+                            // self.store.dispatch({
+                            //     type: 'ADD_DATA',
+                            //     data: new_data
+                            // })
+                            // self.updateUI(onupdate, itemsToLoad)
                         }
                     }
                 });

@@ -7,6 +7,7 @@
     <div>
         <form action="details" id="new-item-form" method="POST">
             <input type="text" name="label" placeholder="new item">
+            {{ csrf_input }}
             <p>
                 <button data-target="new-item-form" data-targettype="form" data-onupdate="todos">Submit</button>
             </p>

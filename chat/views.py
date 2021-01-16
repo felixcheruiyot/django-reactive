@@ -1,9 +1,18 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+import json
+
 from .decorators import view_template
+
+
+from .models import Todo
 
 @view_template(template="chat/index.html")
 def index(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        print(data)
+        Todo.objects.create(label=data["label"])
     return JsonResponse({"title": "Django NO-SPA TODO"})
 
 def loader(request):
@@ -11,5 +20,6 @@ def loader(request):
 
 @view_template(template="chat/todos.html")
 def todos(request):
-    todos = [{"name": "xx"}]
+    todos = Todo.objects.all()
+    todos = [{"label": todo.label, "done": todo.done} for todo in todos]
     return JsonResponse({"todos": todos})
