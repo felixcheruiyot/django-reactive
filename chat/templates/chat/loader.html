@@ -22,22 +22,22 @@
     <div class="row">
         <div class="col">
             <div style="background-color: gold;">
-                <loader id="items" src="/"></loader>
+                <loader id="items" schema="items" src="/"></loader>
             </div>
         </div>
         <div class="col">
             <div style="background-color: green;">
-                <loader id="xxxxxxx" src="/todos2"></loader>
+                <loader id="xxxxxxx" schema="todos" src="/todos2"></loader>
             </div>
         </div>
         <div class="col">
             <div style="background-color: red;">
-                <loader id="todos" src="/todos"></loader>
+                <loader id="todos" schema="todos" src="/todos"></loader>
             </div>
         </div>
         <div class="col">
             <div style="background-color: blue;">
-                <loader id="todos2" src="/todos"></loader>
+                <loader id="todos2" schema="todos" src="/todos"></loader>
             </div>
         </div>
     </div>
@@ -73,10 +73,15 @@
         updateUI(id, element) {
             self = this
             let src = element.getAttribute("src")
+            let schema = element.getAttribute("schema")
             let data = self.store.getState()
             console.log("Data", self.store.getState())
             let output = self.parseTemplate(src, data).then((output) => {
-                element.innerHTML = output
+                // Update all items with same schema
+                let elements = document.querySelectorAll('[schema="' + schema + '"]');
+                elements.forEach((element) => {
+                    element.innerHTML = output
+                })
                 self.setElementEventsListers(element)
             })
         }
@@ -165,7 +170,8 @@
                                 let src = elementToLoad.getAttribute("src")
                                 this.getData(onupdate, src).then(function (output) {
                                     if (output) {
-                                        elementToLoad.dispatchEvent(self.onupdateEvent);
+                                        elementToLoad.dispatchEvent(self
+                                            .onupdateEvent);
                                     }
                                 })
                             }).catch((err) => {
