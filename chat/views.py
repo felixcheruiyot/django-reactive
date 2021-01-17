@@ -19,6 +19,19 @@ def index(request):
     except Exception as ex:
         return JsonResponse({"title": "Django NO-SPA TODO", "errors": str(ex)}, status=400)
 
+@view_template(template="chat/form2.html")
+def todos2(request):
+    try:
+        if request.method == "POST":
+            data = json.loads(request.body.decode("utf-8"))
+            if not data["label"]:
+                raise Exception("Label field is required")
+            Todo.objects.create(label=data["label"])
+        return JsonResponse({"title": "Django NO-SPA TODO"})
+    except Exception as ex:
+        return JsonResponse({"title": "Django NO-SPA TODO", "errors": str(ex)}, status=400)
+
+
 def loader(request):
     return render(request, "chat/loader.html", {})
 

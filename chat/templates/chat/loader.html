@@ -26,13 +26,18 @@
             </div>
         </div>
         <div class="col">
+            <div style="background-color: green;">
+                <loader id="xxxxxxx" src="/todos2"></loader>
+            </div>
+        </div>
+        <div class="col">
             <div style="background-color: red;">
                 <loader id="todos" src="/todos"></loader>
             </div>
         </div>
         <div class="col">
             <div style="background-color: blue;">
-                <loader id="services" src="/todos"></loader>
+                <loader id="todos2" src="/todos"></loader>
             </div>
         </div>
     </div>
@@ -46,14 +51,19 @@
         constructor() {
             let self = this
             this.loaders = document.querySelectorAll("loader")
+            this.onupdateEvent = new Event("onUpdate")
+
             if (this.loaders) {
                 self.createStore()
-                this.loaders.forEach(element => {
-                    let src = element.getAttribute("src")
-                    let id = element.getAttribute("id")
+                this.loaders.forEach(loader => {
+                    let src = loader.getAttribute("src")
+                    let id = loader.getAttribute("id")
+                    loader.addEventListener('onUpdate', (ev) => {
+                        self.updateUI(id, loader)
+                    }, false);
                     this.getData(id, src).then(function (output) {
                         if (output) {
-                            self.updateUI(id, element)
+                            loader.dispatchEvent(self.onupdateEvent);
                         }
                     })
                 })
@@ -155,7 +165,7 @@
                                 let src = elementToLoad.getAttribute("src")
                                 this.getData(onupdate, src).then(function (output) {
                                     if (output) {
-                                        self.updateUI(onupdate, elementToLoad)
+                                        elementToLoad.dispatchEvent(self.onupdateEvent);
                                     }
                                 })
                             }).catch((err) => {
@@ -164,8 +174,7 @@
                                     data: err.response.data
                                 })
                                 let parentContainer = button.closest("loader")
-                                let parentId = parentContainer.getAttribute("id")
-                                self.updateUI(parentId, parentContainer)
+                                parentContainer.dispatchEvent(self.onupdateEvent);
                             })
 
                             // let current_data = self.store.getState()[onupdate]
