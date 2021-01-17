@@ -17,7 +17,7 @@ def index(request):
             Todo.objects.create(label=data["label"])
         return JsonResponse({"title": "Django NO-SPA TODO"})
     except Exception as ex:
-        return JsonResponse({"title": "Django NO-SPA TODO", "errors": str(ex)})
+        return JsonResponse({"title": "Django NO-SPA TODO", "errors": str(ex)}, status=400)
 
 def loader(request):
     return render(request, "chat/loader.html", {})

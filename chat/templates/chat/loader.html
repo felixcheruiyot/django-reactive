@@ -1,20 +1,40 @@
 <html>
 
 <head>
+    <style>
+        .row {
+            display: flex;
+            flex-direction: row;
+        }
 
+        .col {
+            flex: 1;
+        }
+
+        button {
+            background-color: purple;
+        }
+    </style>
 </head>
 
 <body>
     <h1>Load and compute items</h1>
-    <div style="background-color: gold;">
-        <loader id="items" src="/"></loader>
-    </div>
-    <div style="background-color: red;">
-        <loader id="todos" src="/todos"></loader>
-    </div>
-
-    <div style="background-color: blue;">
-        <loader id="services" src="/todos"></loader>
+    <div class="row">
+        <div class="col">
+            <div style="background-color: gold;">
+                <loader id="items" src="/"></loader>
+            </div>
+        </div>
+        <div class="col">
+            <div style="background-color: red;">
+                <loader id="todos" src="/todos"></loader>
+            </div>
+        </div>
+        <div class="col">
+            <div style="background-color: blue;">
+                <loader id="services" src="/todos"></loader>
+            </div>
+        </div>
     </div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -67,7 +87,6 @@
             function dataManager(state = [], action) {
                 switch (action.type) {
                     case 'ADD_DATA':
-                        console.log("Add data")
                         state = action.data
                         return state
                     case 'REMOVE_DATA':
@@ -139,6 +158,14 @@
                                         self.updateUI(onupdate, elementToLoad)
                                     }
                                 })
+                            }).catch((err) => {
+                                self.store.dispatch({
+                                    type: 'ADD_DATA',
+                                    data: err.response.data
+                                })
+                                let parentContainer = button.closest("loader")
+                                let parentId = parentContainer.getAttribute("id")
+                                self.updateUI(parentId, parentContainer)
                             })
 
                             // let current_data = self.store.getState()[onupdate]
