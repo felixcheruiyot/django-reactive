@@ -5,6 +5,11 @@
     </div>
 
     <div>
+        {% if errors %}
+        <div style="background: orange;">
+            {{errors}}
+        </div>
+        {% endif %}
         <form action="details" id="new-item-form" method="POST">
             <input type="text" name="label" placeholder="new item">
             {{ csrf_input }}
