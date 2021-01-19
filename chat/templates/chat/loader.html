@@ -18,16 +18,22 @@
 </head>
 
 <body>
+    <div>
+        <a href="/todos" data-navigo>Todos</a>
+        <a href="/new" data-navigo>New</a>
+    </div>
+    <div id="content">Content</div>
+    <hr />
     <h1>Load and compute items</h1>
     <div class="row">
         <div class="col">
             <div style="background-color: gold;">
-                <loader id="items" schema="items" src="/"></loader>
+                <loader id="new-todo" schema="items" src="/"></loader>
             </div>
         </div>
         <div class="col">
             <div style="background-color: green;">
-                <loader id="xxxxxxx" schema="todos" src="/todos2"></loader>
+                <loader id="xxxxxxx" schema="xxxxxxx" src="/todos2"></loader>
             </div>
         </div>
         <div class="col">
@@ -46,6 +52,7 @@
 <script src="https://mozilla.github.io/nunjucks/files/nunjucks.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.5/redux.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+<script src="//unpkg.com/navigo"></script>
 <script>
     class Loader {
         constructor() {
@@ -76,13 +83,14 @@
             let schema = element.getAttribute("schema")
             let data = self.store.getState()
             console.log("Data", self.store.getState())
-            let output = self.parseTemplate(src, data).then((output) => {
+            return self.parseTemplate(src, data).then((output) => {
                 // Update all items with same schema
                 let elements = document.querySelectorAll('[schema="' + schema + '"]');
                 elements.forEach((element) => {
                     element.innerHTML = output
                 })
                 self.setElementEventsListers(element)
+                return output
             })
         }
 
@@ -201,6 +209,45 @@
     }
 
     let loader = new Loader()
+
+    class Router {
+        constructor() {
+            const router = new Navigo("/", {
+                hash: true
+            });
+            const render = (content) =>
+                (document.querySelector("#content").innerHTML = content);
+
+            router
+                .on("/todos", (match) => {
+                    console.log("match", match);
+                    // let element = document.getElementById("todos")
+                    // let src = element.getAttribute("src")
+                    // let id = element.getAttribute("id")
+                    // element.addEventListener('onUpdate', (ev) => {
+                    //     let output = loader.updateUI(id, element)
+                    //     render(output);
+                    // }, false);
+                    // loader.getData(id, src).then(function (output) {
+                    //     if (output) {
+                    //         element.dispatchEvent(loader.onupdateEvent);
+                    //     }
+                    // })
+                    render("Todos")
+                }).on("/new", (match) => {
+                    console.log("match", match);
+                    render(document.getElementById("new-todo").innerHTML);
+                }).on((match) => {
+                    console.log(match);
+                    render("home");
+                }).resolve();
+
+        }
+    }
+
+    window.addEventListener("load", () => {
+        let router = new Router()
+    })
 </script>
 
 </html>
