@@ -14,4 +14,8 @@ Generally you get to write Django code as usual but the result template is rende
 
 Summary: Django reactive proposes compiling template to javascript objects for easy data states management and rendering using the same principles used in SPA frameworks.
 
+Here is a demo video link: https://youtu.be/wBQjXse6b7M
+
+Note we have four templates rendered using Django views. Adding a new item to todo updates the other two views on the same page.
+
 NB: This project is at very early stage - consider hiting the watch button or bookmark it for easy tracking of its project. Follow me on https://twitter.com/felixcheruiyot
